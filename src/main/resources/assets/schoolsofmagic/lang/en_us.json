@@ -1,0 +1,10 @@
+{
+  "item.schoolsofmagic.wand_base": "Wand (Basic)",
+  "item.schoolsofmagic.journal": "Magical Journal",
+  "block.schoolsofmagic.study_table": "Study Table",
+  "block.schoolsofmagic.magical_workbench": "Magical Workbench",
+  "itemGroup.schoolsofmagic": "Schools of Magic",
+  "tooltip.schoolsofmagic.journal.no_owner": "Right-click to bind to you",
+  "tooltip.schoolsofmagic.journal.owner": "Owner: %s",
+  "container.schoolsofmagic.magical_workbench.name": "§r§fMagical Workbench"
+}
