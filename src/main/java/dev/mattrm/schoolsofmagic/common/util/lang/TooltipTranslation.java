@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 public enum TooltipTranslation implements ITranslationProvider {
     JOURNAL_OWNER("journal.owner", 1),
     JOURNAL_NO_OWNER("journal.no_owner", 0),
+    JOURNAL_LOADING_OWNER("journal.loading_owner", 0),
     ;
 //    CONSTRUCTIONBLOCKPOWDER_HELPTEXT("constructionblockpowder.helptext", 0),
 //    GADGET_BLOCK("gadget.block", 1),

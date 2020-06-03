@@ -1,6 +1,7 @@
 package dev.mattrm.schoolsofmagic.common.item;
 
 import com.mojang.util.UUIDTypeAdapter;
+import dev.mattrm.schoolsofmagic.common.cache.UsernameCache;
 import dev.mattrm.schoolsofmagic.common.util.lang.Styles;
 import dev.mattrm.schoolsofmagic.common.util.lang.TooltipTranslation;
 import net.minecraft.client.util.ITooltipFlag;
@@ -17,6 +18,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class MagicalJournalItem extends Item {
     public MagicalJournalItem(Properties props) {
@@ -37,9 +40,9 @@ public class MagicalJournalItem extends Item {
             ItemStack itemStack = player.getHeldItem(hand);
             CompoundNBT nbt = itemStack.getOrCreateTag();
 
-            if (MagicalJournalItem.getOwner(itemStack, world) == null) {
+            if (MagicalJournalItem.getOwner(itemStack) == null) {
                 // TODO: check if this is the proper way to use UUID
-                nbt.putString("Owner", UUIDTypeAdapter.fromUUID(player.getGameProfile().getId()));
+                nbt.putString("Owner", player.getGameProfile().getId().toString());
             } else {
                 // TODO: Open GUI
             }
@@ -53,10 +56,10 @@ public class MagicalJournalItem extends Item {
     public void addInformation(ItemStack itemStack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag tooltipFlag) {
         super.addInformation(itemStack, world, tooltip, tooltipFlag);
 
-        MagicalJournalItem.addOwnerTooltip(tooltip, MagicalJournalItem.getOwner(itemStack, world));
+        MagicalJournalItem.addOwnerTooltip(tooltip, MagicalJournalItem.getOwner(itemStack));
     }
 
-    public static String getOwner(ItemStack itemStack, World worldIn) {
+    public static UUID getOwnerUUID(ItemStack itemStack) {
         CompoundNBT nbt = itemStack.getOrCreateTag();
 
         // TODO: check if this is the proper way to use UUID
@@ -65,14 +68,32 @@ public class MagicalJournalItem extends Item {
             return null;
         } else {
             try {
-                if (worldIn.getPlayerByUuid(UUIDTypeAdapter.fromString(uuidRaw)) != null) {
-                    return worldIn.getPlayerByUuid(UUIDTypeAdapter.fromString(uuidRaw)).getName().getString();
-                } else {
-                    return null;
-                }
+                return UUID.fromString(uuidRaw);
             } catch (IllegalArgumentException e) {
                 nbt.putString("Owner", "");
                 return null;
+            }
+        }
+    }
+
+    public static String getOwner(ItemStack itemStack) {
+        CompoundNBT nbt = itemStack.getOrCreateTag();
+
+        // TODO: check if this is the proper way to use UUID
+        String uuidRaw = nbt.getString("Owner");
+        if (uuidRaw.equals("")) {
+            return null;
+        } else {
+            try {
+                UUID uuid = UUID.fromString(uuidRaw);
+                return UsernameCache.get(uuid).get();
+            } catch (IllegalArgumentException e) {
+                nbt.putString("Owner", "");
+                return null;
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+//                return "__loading";
+                return uuidRaw;
             }
         }
     }
@@ -81,6 +102,8 @@ public class MagicalJournalItem extends Item {
     public static void addOwnerTooltip(List<ITextComponent> tooltip, String owner) {
         if (owner == null) {
             tooltip.add(TooltipTranslation.JOURNAL_NO_OWNER.componentTranslation().setStyle(Styles.RED));
+        } else if (owner.equals("__loading")){
+            tooltip.add(TooltipTranslation.JOURNAL_LOADING_OWNER.componentTranslation().setStyle(Styles.YELLOW.setItalic(true)));
         } else {
             tooltip.add(TooltipTranslation.JOURNAL_OWNER.componentTranslation(owner).setStyle(Styles.YELLOW));
         }

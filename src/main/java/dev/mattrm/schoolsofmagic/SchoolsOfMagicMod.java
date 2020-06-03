@@ -2,6 +2,7 @@ package dev.mattrm.schoolsofmagic;
 
 import dev.mattrm.schoolsofmagic.client.misc.ModItemGroups;
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
+import dev.mattrm.schoolsofmagic.common.cache.UsernameCache;
 import dev.mattrm.schoolsofmagic.common.inventory.container.ModContainerTypes;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
 import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
@@ -52,6 +53,8 @@ public class SchoolsOfMagicMod {
 
     private void setup(final FMLCommonSetupEvent event) {
         // PreInit code
+        LOGGER.info("Enabling username cache...");
+        UsernameCache.initCache(100);
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
