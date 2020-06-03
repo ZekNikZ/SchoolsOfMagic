@@ -3,6 +3,7 @@ package dev.mattrm.schoolsofmagic.common.tileentity;
 import dev.mattrm.schoolsofmagic.common.block.MagicalWorkbenchBlock;
 import dev.mattrm.schoolsofmagic.common.inventory.container.MagicalWorkbenchContainer;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
+import dev.mattrm.schoolsofmagic.common.util.ItemStackHelperExtensions;
 import dev.mattrm.schoolsofmagic.common.util.lang.ContainerTranslation;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -84,7 +85,9 @@ public class MagicalWorkbenchTileEntity extends LockableLootTileEntity {
 
         if (!this.checkLootAndWrite(nbt)) {
             ItemStackHelper.saveAllItems(nbt, this.contents);
+            ItemStackHelperExtensions.saveAllItems("CraftingItems", nbt, this.craftingInventory);
         }
+
         return nbt;
     }
 
@@ -95,6 +98,7 @@ public class MagicalWorkbenchTileEntity extends LockableLootTileEntity {
         this.contents = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
         if (!this.checkLootAndWrite(nbt)) {
             ItemStackHelper.loadAllItems(nbt, this.contents);
+            ItemStackHelperExtensions.loadAllItems("CraftingItems", nbt, this.craftingInventory);
         }
     }
 

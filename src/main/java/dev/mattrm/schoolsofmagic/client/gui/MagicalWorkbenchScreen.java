@@ -12,7 +12,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class MagicalWorkbenchScreen extends ContainerScreen<MagicalWorkbenchContainer> {
-    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(GlobalConstants.MODID, "textures/gui/magical_workbench.png");
+    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(GlobalConstants.MODID, "textures/gui/container/magical_workbench.png");
 
     public MagicalWorkbenchScreen(MagicalWorkbenchContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
         super(screenContainer, inv, titleIn);

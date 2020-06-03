@@ -1,12 +1,14 @@
 package dev.mattrm.schoolsofmagic.common.inventory;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IRecipeHolder;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
@@ -84,5 +86,11 @@ public class MagicalWorkbenchCraftResultInventory implements IInventory, IRecipe
     @Nullable
     public IRecipe<?> getRecipeUsed() {
         return this.recipeUsed;
+    }
+
+    @Override
+    public boolean canUseRecipe(World worldIn, ServerPlayerEntity player, IRecipe<?> recipe) {
+        this.setRecipeUsed(recipe);
+        return true;
     }
 }

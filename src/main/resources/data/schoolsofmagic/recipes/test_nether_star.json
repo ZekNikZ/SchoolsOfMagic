@@ -1,0 +1,40 @@
+{
+  "type": "schoolsofmagic:workbench_shaped",
+  "pattern": [
+    "CI",
+    "EDG",
+    "LR"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:coal"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "E": {
+      "item": "minecraft:emerald"
+    },
+    "D": {
+      "item": "minecraft:diamond",
+      "count": 2
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "L": {
+      "item": "minecraft:lapis_lazuli"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "requires_journal": true,
+  "unlocks_required": [
+    "schoolsofmagic:test_nether_star"
+  ],
+  "result": {
+    "item": "minecraft:nether_star",
+    "count": 2
+  }
+}

@@ -3,22 +3,30 @@ package dev.mattrm.schoolsofmagic.common.inventory.container;
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftResultInventory;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
+import dev.mattrm.schoolsofmagic.common.item.ModItems;
+import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
+import dev.mattrm.schoolsofmagic.common.recipe.ShapedWorkbenchRecipe;
 import dev.mattrm.schoolsofmagic.common.tileentity.MagicalWorkbenchTileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 // TODO: become proper crafting table
@@ -55,7 +63,12 @@ public class MagicalWorkbenchContainer extends Container {
         int curr_index = 0;
         int journalX = 93;
         int journalY = 18;
-        this.addSlot(new Slot(this.craftMatrix, MagicalWorkbenchCraftingInventory.JOURNAL_SLOT, journalX, journalY));
+        this.addSlot(new Slot(this.craftMatrix, MagicalWorkbenchCraftingInventory.JOURNAL_SLOT, journalX, journalY) {
+            @Override
+            public boolean isItemValid(ItemStack stack) {
+                return stack.getItem() == ModItems.MAGICAL_JOURNAL.get();
+            }
+        });
 
         // Crafting Grid
         int row1X = 39;
@@ -98,6 +111,9 @@ public class MagicalWorkbenchContainer extends Container {
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInventoryIn, col, playerHotbarStartX + col * (slotSize + margin), playerHotbarStartY));
         }
+
+        // Update result slot
+        this.onCraftMatrixChanged(this.craftMatrix);
     }
 
     public MagicalWorkbenchContainer(final int id, final PlayerInventory playerInventory, final PacketBuffer data) {
@@ -185,21 +201,31 @@ public class MagicalWorkbenchContainer extends Container {
         if (!worldIn.isRemote) {
             ServerPlayerEntity serverplayerentity = (ServerPlayerEntity)playerIn;
             ItemStack itemstack = ItemStack.EMPTY;
-//            Optional<ICraftingRecipe> optional = worldIn.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, inventoryIn, worldIn);
-//            if (optional.isPresent()) {
-//                ICraftingRecipe icraftingrecipe = optional.get();
-//                if (inventoryResult.canUseRecipe(worldIn, serverplayerentity, icraftingrecipe)) {
-//                    itemstack = icraftingrecipe.getCraftingResult(inventoryIn);
-//                }
-//            }
-            if (ItemStack.areItemsEqual(inventoryIn.getStackInSlot(3), new ItemStack(Items.DIAMOND, 2))
-                    && inventoryIn.getStackInSlot(3).getCount() >= 2
-                    && IntStream.of(0,1,2,4,5,6).allMatch(i -> inventoryIn.getStackInSlot(i).isEmpty())) {
-                itemstack = new ItemStack(Items.DIAMOND_SWORD);
+            Optional<ShapedWorkbenchRecipe> optional = worldIn.getServer().getRecipeManager().getRecipe(ModCrafting.RecipeTypes.WORKBENCH_SHAPED, inventoryIn, worldIn);
+            if (optional.isPresent()) {
+                ShapedWorkbenchRecipe recipe = optional.get();
+                if (inventoryResult.canUseRecipe(worldIn, serverplayerentity, recipe)) {
+                    itemstack = recipe.getCraftingResult(inventoryIn);
+                }
             }
+//            if (ItemStack.areItemsEqual(inventoryIn.getStackInSlot(3), new ItemStack(Items.DIAMOND, 2))
+//                    && inventoryIn.getStackInSlot(3).getCount() >= 2
+//                    && IntStream.of(0,1,2,4,5,6).allMatch(i -> inventoryIn.getStackInSlot(i).isEmpty())) {
+//                itemstack = new ItemStack(Items.DIAMOND_SWORD);
+//            }
 
             inventoryResult.setInventorySlotContents(0, itemstack);
             serverplayerentity.connection.sendPacket(new SSetSlotPacket(id, 0, itemstack));
         }
+    }
+
+    // auto update crafting result
+    @Override
+    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player) {
+        ItemStack result = super.slotClick(slotId, dragType, clickTypeIn, player);
+        if (slotId >= CRAFT_MATRIX_SLOTS_MIN && slotId <= CRAFT_MATRIX_SLOTS_MAX) {
+            this.onCraftMatrixChanged(this.craftMatrix);
+        }
+        return result;
     }
 }

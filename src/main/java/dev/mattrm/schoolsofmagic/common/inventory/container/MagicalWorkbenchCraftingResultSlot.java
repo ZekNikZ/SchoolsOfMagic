@@ -1,6 +1,7 @@
 package dev.mattrm.schoolsofmagic.common.inventory.container;
 
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
+import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
@@ -69,16 +70,17 @@ public class MagicalWorkbenchCraftingResultSlot extends Slot {
         this.amountCrafted = 0;
     }
 
+    // TODO: don't remove the book
     public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
         this.onCrafting(stack);
 
         // Find the crafting recipe
         net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
-        NonNullList<ItemStack> recipeRemainingItems = NonNullList.withSize(this.craftMatrix.getSizeInventory(), ItemStack.EMPTY);
+//        NonNullList<ItemStack> recipeRemainingItems = NonNullList.withSize(this.craftMatrix.getSizeInventory(), ItemStack.EMPTY);
 //        for (int i = 0; i < 7; i++) {
 //            recipeRemainingItems.set(i, this.craftMatrix.getStackInSlot(i));
 //        }
-//        NonNullList<ItemStack> recipeRemainingItems = thePlayer.world.getRecipeManager().getRecipeNonNull(IRecipeType.CRAFTING, this.craftMatrix, thePlayer.world);
+        NonNullList<ItemStack> recipeRemainingItems = thePlayer.world.getRecipeManager().getRecipeNonNull(ModCrafting.RecipeTypes.WORKBENCH_SHAPED, this.craftMatrix, thePlayer.world);
         net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
 
         // Apply the crafting recipe
@@ -86,7 +88,7 @@ public class MagicalWorkbenchCraftingResultSlot extends Slot {
             ItemStack itemStackProvided = this.craftMatrix.getStackInSlot(i);
             ItemStack remainingItem = recipeRemainingItems.get(i);
             if (!itemStackProvided.isEmpty()) {
-                this.craftMatrix.decrStackSize(i, 2); // TODO: use this.inventory to get # of items used from recipe
+                this.craftMatrix.decrStackSize(i, 1);
                 itemStackProvided = this.craftMatrix.getStackInSlot(i);
             }
 

@@ -4,6 +4,7 @@ import dev.mattrm.schoolsofmagic.client.misc.ModItemGroups;
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
 import dev.mattrm.schoolsofmagic.common.inventory.container.ModContainerTypes;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
+import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
 import dev.mattrm.schoolsofmagic.common.tileentity.ModTileEntityTypes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -43,6 +44,7 @@ public class SchoolsOfMagicMod {
         ModBlocks.BLOCKS.register(modEventBus);
         ModTileEntityTypes.TILE_ENTITY_TYPES.register(modEventBus);
         ModContainerTypes.CONTAINER_TYPES.register(modEventBus);
+        ModCrafting.Recipes.RECIPE_SERIALIZERS.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);

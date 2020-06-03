@@ -1,5 +1,6 @@
 package dev.mattrm.schoolsofmagic.common.inventory;
 
+import dev.mattrm.schoolsofmagic.common.item.ModItems;
 import dev.mattrm.schoolsofmagic.common.tileentity.MagicalWorkbenchTileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
@@ -7,6 +8,7 @@ import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.Iterator;
 
@@ -16,10 +18,12 @@ public class MagicalWorkbenchCraftingInventory implements IInventory {
 
     private final NonNullList<ItemStack> stackList;
     private final Container eventHandler;
+    private final MagicalWorkbenchTileEntity tileEntity;
 
     public MagicalWorkbenchCraftingInventory(Container container, MagicalWorkbenchTileEntity tileEntity) {
         this.stackList = tileEntity.getCraftingInventory();
         this.eventHandler = container;
+        this.tileEntity = tileEntity;
     }
 
     @Override
@@ -66,6 +70,7 @@ public class MagicalWorkbenchCraftingInventory implements IInventory {
 
     @Override
     public void markDirty() {
+        this.tileEntity.markDirty();
     }
 
     @Override
@@ -81,5 +86,14 @@ public class MagicalWorkbenchCraftingInventory implements IInventory {
     @Override
     public void openInventory(PlayerEntity player) {
         this.eventHandler.onCraftMatrixChanged(this);
+    }
+
+    @Override
+    public boolean isItemValidForSlot(int index, ItemStack stack) {
+        if (index == JOURNAL_SLOT) {
+            return stack.getItem() == ModItems.MAGICAL_JOURNAL.get();
+        }
+
+        return true;
     }
 }
