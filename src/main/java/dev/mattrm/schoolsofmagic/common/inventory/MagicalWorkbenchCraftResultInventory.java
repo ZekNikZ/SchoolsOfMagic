@@ -1,5 +1,6 @@
 package dev.mattrm.schoolsofmagic.common.inventory;
 
+import dev.mattrm.schoolsofmagic.common.recipe.ShapedWorkbenchRecipe;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;

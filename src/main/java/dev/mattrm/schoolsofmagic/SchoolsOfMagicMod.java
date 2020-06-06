@@ -2,15 +2,23 @@ package dev.mattrm.schoolsofmagic;
 
 import dev.mattrm.schoolsofmagic.client.misc.ModItemGroups;
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
-import dev.mattrm.schoolsofmagic.common.cache.UsernameCache;
+import dev.mattrm.schoolsofmagic.common.cache.*;
 import dev.mattrm.schoolsofmagic.common.inventory.container.ModContainerTypes;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
+import dev.mattrm.schoolsofmagic.common.networking.SchoolsOfMagicPacketHandler;
 import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
 import dev.mattrm.schoolsofmagic.common.tileentity.ModTileEntityTypes;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.RegistryObject;
@@ -19,8 +27,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,8 +63,11 @@ public class SchoolsOfMagicMod {
 
     private void setup(final FMLCommonSetupEvent event) {
         // PreInit code
-        LOGGER.info("Enabling username cache...");
+        LOGGER.info("Initializing username cache...");
         UsernameCache.initCache(100);
+
+        // Force Java to load packet system
+        SchoolsOfMagicPacketHandler.setup();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -75,6 +88,28 @@ public class SchoolsOfMagicMod {
     public void onServerStarting(FMLServerStartingEvent event) {
         // Do something when the server starts
         LOGGER.info("Server starting with Schools of Magic Mod enabled");
+    }
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public void onWorldJoin(EntityJoinWorldEvent event) {
+        if (event.getEntity() instanceof PlayerEntity && event.getWorld().isRemote) {
+            LOGGER.info("Initializing client advancement cache...");
+            AdvancementCache.invalidateClient();
+            AdvancementCache.initClientCache(new ClientAdvancementCache());
+        }
+    }
+
+    // TODO: this works for singleplayer not multiplayer
+    @SubscribeEvent
+    public void onServerStarted(FMLServerStartedEvent event) {
+        LOGGER.info("Initializing server advancement cache...");
+        if (event.getServer().getWorld(DimensionType.OVERWORLD).isRemote) {
+//            AdvancementCache.invalidate();
+//            AdvancementCache.initCache(new ClientAdvancementCache());
+        } else {
+            AdvancementCache.initServerCache(new ServerAdvancementCache(event.getServer()));
+        }
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD

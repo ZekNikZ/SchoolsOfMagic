@@ -1,6 +1,7 @@
 package dev.mattrm.schoolsofmagic.common.inventory.container;
 
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
+import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftResultInventory;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
@@ -29,7 +30,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
-// TODO: become proper crafting table
 public class MagicalWorkbenchContainer extends Container {
     private static final int RESULT_SLOT = 0;
     private static final int JOURNAL_SLOT = 1;
@@ -197,7 +197,6 @@ public class MagicalWorkbenchContainer extends Container {
     }
 
     protected static void updateCraftingResult(int id, World worldIn, PlayerEntity playerIn, MagicalWorkbenchCraftingInventory inventoryIn, MagicalWorkbenchCraftResultInventory inventoryResult) {
-        // TODO: properly get crafting recipe
         if (!worldIn.isRemote) {
             ServerPlayerEntity serverplayerentity = (ServerPlayerEntity)playerIn;
             ItemStack itemstack = ItemStack.EMPTY;

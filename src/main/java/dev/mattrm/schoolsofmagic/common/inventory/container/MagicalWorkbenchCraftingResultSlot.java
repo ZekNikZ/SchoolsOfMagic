@@ -70,7 +70,6 @@ public class MagicalWorkbenchCraftingResultSlot extends Slot {
         this.amountCrafted = 0;
     }
 
-    // TODO: don't remove the book
     public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
         this.onCrafting(stack);
 
@@ -83,8 +82,11 @@ public class MagicalWorkbenchCraftingResultSlot extends Slot {
         NonNullList<ItemStack> recipeRemainingItems = thePlayer.world.getRecipeManager().getRecipeNonNull(ModCrafting.RecipeTypes.WORKBENCH_SHAPED, this.craftMatrix, thePlayer.world);
         net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
 
+        // TODO: temporary fix until I can get it to actually work
+//        recipeRemainingItems = NonNullList.withSize(8, ItemStack.EMPTY);
+
         // Apply the crafting recipe
-        for(int i = 0; i < recipeRemainingItems.size(); ++i) {
+        for(int i = 0; i < recipeRemainingItems.size() - 1; ++i) {
             ItemStack itemStackProvided = this.craftMatrix.getStackInSlot(i);
             ItemStack remainingItem = recipeRemainingItems.get(i);
             if (!itemStackProvided.isEmpty()) {

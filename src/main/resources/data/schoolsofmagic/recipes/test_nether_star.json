@@ -30,9 +30,11 @@
     }
   },
   "requires_journal": true,
-  "unlocks_required": [
-    "schoolsofmagic:test_nether_star"
+  "required_advancements": [
+    "schoolsofmagic:test/test_nether_star",
+    "schoolsofmagic:schools/join_school_arcane"
   ],
+  "advancement_mode": "ALL",
   "result": {
     "item": "minecraft:nether_star",
     "count": 2
