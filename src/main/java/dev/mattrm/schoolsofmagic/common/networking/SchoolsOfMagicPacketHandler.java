@@ -20,7 +20,9 @@ public class SchoolsOfMagicPacketHandler {
 
         int id = 0;
         instance.registerMessage(++id, AdvancementProgressSyncMessage.Query.class, AdvancementProgressSyncMessage.Query::encode, AdvancementProgressSyncMessage.Query::decode, AdvancementProgressSyncMessage.Query::handle);
+        instance.registerMessage(++id, AdvancementProgressSyncMessage.QueryAll.class, AdvancementProgressSyncMessage.QueryAll::encode, AdvancementProgressSyncMessage.QueryAll::decode, AdvancementProgressSyncMessage.QueryAll::handle);
         instance.registerMessage(++id, AdvancementProgressSyncMessage.Sync.class, AdvancementProgressSyncMessage.Sync::encode, AdvancementProgressSyncMessage.Sync::decode, AdvancementProgressSyncMessage.Sync::handle);
+        instance.registerMessage(++id, AdvancementProgressSyncMessage.SyncAll.class, AdvancementProgressSyncMessage.SyncAll::encode, AdvancementProgressSyncMessage.SyncAll::decode, AdvancementProgressSyncMessage.SyncAll::handle);
     }
 
     public static SimpleChannel getInstance() {

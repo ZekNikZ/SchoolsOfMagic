@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
 import dev.mattrm.schoolsofmagic.common.cache.AdvancementCacheOld;
+import dev.mattrm.schoolsofmagic.common.cache.ClientAdvancementCache;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
 import dev.mattrm.schoolsofmagic.common.item.MagicalJournalItem;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
@@ -211,13 +212,13 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
         ALL {
             @Override
             public boolean check(UUID uuid, String[] advancements, boolean clientSide) {
-                return Arrays.stream(advancements).allMatch(a -> AdvancementCache.getInstance(clientSide).getIsDone(uuid, new ResourceLocation(a)));
+                return Arrays.stream(advancements).map(a -> AdvancementCache.getInstance(clientSide).getIsDone(uuid, new ResourceLocation(a))).allMatch(a -> a);
             }
         },
         ANY {
             @Override
             public boolean check(UUID uuid, String[] advancements, boolean clientSide) {
-                return Arrays.stream(advancements).anyMatch(a -> AdvancementCache.getInstance(clientSide).getIsDone(uuid, new ResourceLocation(a)));
+                return Arrays.stream(advancements).map(a -> AdvancementCache.getInstance(clientSide).getIsDone(uuid, new ResourceLocation(a))).anyMatch(a -> a);
             }
         };
 

@@ -1,5 +1,10 @@
 package dev.mattrm.schoolsofmagic.common.block;
 
+import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
+import dev.mattrm.schoolsofmagic.common.cache.ClientAdvancementCache;
+import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
+import dev.mattrm.schoolsofmagic.common.item.MagicalJournalItem;
+import dev.mattrm.schoolsofmagic.common.item.ModItems;
 import dev.mattrm.schoolsofmagic.common.tileentity.ModTileEntityTypes;
 import dev.mattrm.schoolsofmagic.common.tileentity.MagicalWorkbenchTileEntity;
 import net.minecraft.block.Block;
@@ -9,6 +14,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -38,11 +44,10 @@ public class MagicalWorkbenchBlock extends Block {
 
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult result) {
+        TileEntity te = worldIn.getTileEntity(pos);
         if (!worldIn.isRemote) {
-            TileEntity te = worldIn.getTileEntity(pos);
             if (te instanceof MagicalWorkbenchTileEntity) {
                 NetworkHooks.openGui((ServerPlayerEntity) player, (MagicalWorkbenchTileEntity) te, pos);
-                return ActionResultType.SUCCESS;
             }
         }
         return ActionResultType.SUCCESS;

@@ -9,6 +9,7 @@ import dev.mattrm.schoolsofmagic.common.networking.SchoolsOfMagicPacketHandler;
 import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
 import dev.mattrm.schoolsofmagic.common.tileentity.ModTileEntityTypes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.world.dimension.DimensionType;
@@ -18,6 +19,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -73,6 +75,10 @@ public class SchoolsOfMagicMod {
     private void doClientStuff(final FMLClientSetupEvent event) {
         // Client setup
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
+
+        LOGGER.info("Initializing client advancement cache...");
+        AdvancementCache.invalidateClient();
+        AdvancementCache.initClientCache(new ClientAdvancementCache());
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event) {
@@ -91,23 +97,28 @@ public class SchoolsOfMagicMod {
     }
 
     @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public void onWorldJoin(EntityJoinWorldEvent event) {
-        if (event.getEntity() instanceof PlayerEntity && event.getWorld().isRemote) {
-            LOGGER.info("Initializing client advancement cache...");
-            AdvancementCache.invalidateClient();
-            AdvancementCache.initClientCache(new ClientAdvancementCache());
-        }
+    public void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        LOGGER.info("Sending new client current cache.");
+        AdvancementCache.getServerInstance().syncClient((ServerPlayerEntity) event.getEntity());
     }
+
+//    @SubscribeEvent
+//    public void onWorldJoin(EntityJoinWorldEvent event) {
+//        if (event.getEntity() instanceof PlayerEntity && event.getWorld().isRemote) {
+//            LOGGER.info("Initializing client advancement cache...");
+//            AdvancementCache.invalidateClient();
+//            AdvancementCache.initClientCache(new ClientAdvancementCache());
+//        } else if (event.getEntity() instanceof ServerPlayerEntity && !event.getWorld().isRemote) {
+//            LOGGER.info("Sending new client current cache.");
+//            AdvancementCache.getServerInstance().syncClient((ServerPlayerEntity) event.getEntity());
+//        }
+//    }
 
     // TODO: this works for singleplayer not multiplayer
     @SubscribeEvent
     public void onServerStarted(FMLServerStartedEvent event) {
         LOGGER.info("Initializing server advancement cache...");
-        if (event.getServer().getWorld(DimensionType.OVERWORLD).isRemote) {
-//            AdvancementCache.invalidate();
-//            AdvancementCache.initCache(new ClientAdvancementCache());
-        } else {
+        if (!event.getServer().getWorld(DimensionType.OVERWORLD).isRemote) {
             AdvancementCache.initServerCache(new ServerAdvancementCache(event.getServer()));
         }
     }

@@ -9,11 +9,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.Map;
 import java.util.UUID;
 
 public class ServerAdvancementCache extends AdvancementCache {
@@ -23,6 +25,17 @@ public class ServerAdvancementCache extends AdvancementCache {
 
     public ServerAdvancementCache(MinecraftServer server) {
         this.server = server;
+    }
+
+    public Map<ResourceLocation, Boolean> getAllForPlayer(UUID uuid) {
+        return this.cache.getAllByKey1(uuid);
+    }
+
+    public void syncClient(ServerPlayerEntity player) {
+        SchoolsOfMagicPacketHandler.getInstance().send(
+                PacketDistributor.PLAYER.with(() -> player),
+                new AdvancementProgressSyncMessage.SyncAll(this.cache)
+        );
     }
 
     @Override
@@ -52,6 +65,8 @@ public class ServerAdvancementCache extends AdvancementCache {
 
         playerAdvancements.setPlayer(player);
 
-        this.put(uuid, advancement, playerAdvancements.getProgress(this.server.getAdvancementManager().getAdvancement(advancement)));
+        this.put(uuid, advancement, playerAdvancements.getProgress(this.server.getAdvancementManager().getAdvancement(advancement)).isDone());
+
+        this.notifyListeners(uuid, advancement);
     }
 }

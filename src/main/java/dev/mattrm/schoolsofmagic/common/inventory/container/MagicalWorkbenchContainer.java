@@ -2,8 +2,10 @@ package dev.mattrm.schoolsofmagic.common.inventory.container;
 
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
 import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
+import dev.mattrm.schoolsofmagic.common.cache.ClientAdvancementCache;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftResultInventory;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
+import dev.mattrm.schoolsofmagic.common.item.MagicalJournalItem;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
 import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
 import dev.mattrm.schoolsofmagic.common.recipe.ShapedWorkbenchRecipe;
@@ -66,7 +68,7 @@ public class MagicalWorkbenchContainer extends Container {
         this.addSlot(new Slot(this.craftMatrix, MagicalWorkbenchCraftingInventory.JOURNAL_SLOT, journalX, journalY) {
             @Override
             public boolean isItemValid(ItemStack stack) {
-                return stack.getItem() == ModItems.MAGICAL_JOURNAL.get();
+                return stack.getItem() == ModItems.MAGICAL_JOURNAL.get() && MagicalJournalItem.getOwnerUUID(stack) != null;
             }
         });
 
@@ -114,6 +116,14 @@ public class MagicalWorkbenchContainer extends Container {
 
         // Update result slot
         this.onCraftMatrixChanged(this.craftMatrix);
+
+        // Ask server for current advancements
+        if (this.tileEntity.getWorld().isRemote) {
+            ItemStack journalSlot = this.craftMatrix.getStackInSlot(MagicalWorkbenchCraftingInventory.JOURNAL_SLOT);
+            if (journalSlot.getItem() == ModItems.MAGICAL_JOURNAL.get()) {
+                ((ClientAdvancementCache) AdvancementCache.getClientInstance()).loadAllForPlayer(MagicalJournalItem.getOwnerUUID(journalSlot));
+            }
+        }
     }
 
     public MagicalWorkbenchContainer(final int id, final PlayerInventory playerInventory, final PacketBuffer data) {
@@ -198,7 +208,7 @@ public class MagicalWorkbenchContainer extends Container {
 
     protected static void updateCraftingResult(int id, World worldIn, PlayerEntity playerIn, MagicalWorkbenchCraftingInventory inventoryIn, MagicalWorkbenchCraftResultInventory inventoryResult) {
         if (!worldIn.isRemote) {
-            ServerPlayerEntity serverplayerentity = (ServerPlayerEntity)playerIn;
+            ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) playerIn;
             ItemStack itemstack = ItemStack.EMPTY;
             Optional<ShapedWorkbenchRecipe> optional = worldIn.getServer().getRecipeManager().getRecipe(ModCrafting.RecipeTypes.WORKBENCH_SHAPED, inventoryIn, worldIn);
             if (optional.isPresent()) {

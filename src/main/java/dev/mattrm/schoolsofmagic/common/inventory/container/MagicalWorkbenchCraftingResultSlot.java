@@ -64,7 +64,7 @@ public class MagicalWorkbenchCraftingResultSlot extends Slot {
         }
 
         if (this.inventory instanceof IRecipeHolder) {
-            ((IRecipeHolder)this.inventory).onCrafting(this.player);
+            ((IRecipeHolder) this.inventory).onCrafting(this.player);
         }
 
         this.amountCrafted = 0;
@@ -83,10 +83,12 @@ public class MagicalWorkbenchCraftingResultSlot extends Slot {
         net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
 
         // TODO: temporary fix until I can get it to actually work
-//        recipeRemainingItems = NonNullList.withSize(8, ItemStack.EMPTY);
+//        if (thePlayer.getEntityWorld().isRemote) {
+//            recipeRemainingItems = NonNullList.withSize(8, ItemStack.EMPTY);
+//        }
 
         // Apply the crafting recipe
-        for(int i = 0; i < recipeRemainingItems.size() - 1; ++i) {
+        for (int i = 0; i < recipeRemainingItems.size() - 1; ++i) {
             ItemStack itemStackProvided = this.craftMatrix.getStackInSlot(i);
             ItemStack remainingItem = recipeRemainingItems.get(i);
             if (!itemStackProvided.isEmpty()) {
