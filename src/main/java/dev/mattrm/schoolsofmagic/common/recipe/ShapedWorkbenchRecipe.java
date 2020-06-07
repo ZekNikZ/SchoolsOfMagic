@@ -1,5 +1,6 @@
 package dev.mattrm.schoolsofmagic.common.recipe;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -7,8 +8,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
-import dev.mattrm.schoolsofmagic.common.cache.AdvancementCacheOld;
-import dev.mattrm.schoolsofmagic.common.cache.ClientAdvancementCache;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
 import dev.mattrm.schoolsofmagic.common.item.MagicalJournalItem;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
@@ -22,10 +21,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingInventory> {
     private NonNullList<Ingredient> ingredients;
@@ -60,10 +56,18 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
      */
     @Override
     public boolean matches(MagicalWorkbenchCraftingInventory inv, World worldIn) {
-        for (int i = 0; i < MagicalWorkbenchCraftingInventory.NUM_SLOTS; i++) {
-            if (!this.ingredients.get(i).test(inv.getStackInSlot(i))) {
-                return false;
+        boolean flag = false;
+
+        for (int i = 0; i < 6; i++) {
+            boolean result = this.checkRecipeWithRotation(inv, worldIn, i);
+            if (result) {
+                flag = true;
+                break;
             }
+        }
+
+        if (!flag) {
+            return false;
         }
 
         // Check journal / advancements
@@ -77,6 +81,23 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
                     return true;
                 }
             } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static final ImmutableList<Integer> slots = ImmutableList.of(0, 1, 4, 6, 5, 2);
+    private int rotateSlotNo(int slot, int rotation) {
+        if (slot == 3) return 3;
+
+        return slots.get((slots.indexOf(slot) + rotation + slots.size()) % slots.size());
+    }
+
+    private boolean checkRecipeWithRotation(MagicalWorkbenchCraftingInventory inv, World worldIn, int rotation) {
+        for (int i = 0; i < MagicalWorkbenchCraftingInventory.NUM_SLOTS; i++) {
+            if (!this.ingredients.get(i).test(inv.getStackInSlot(rotateSlotNo(i, rotation)))) {
                 return false;
             }
         }
