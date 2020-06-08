@@ -9,6 +9,7 @@ import dev.mattrm.schoolsofmagic.common.item.MagicalJournalItem;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
 import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
 import dev.mattrm.schoolsofmagic.common.recipe.ShapedWorkbenchRecipe;
+import dev.mattrm.schoolsofmagic.common.recipe.ShapelessWorkbenchRecipe;
 import dev.mattrm.schoolsofmagic.common.tileentity.MagicalWorkbenchTileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -121,7 +122,7 @@ public class MagicalWorkbenchContainer extends Container {
         if (this.tileEntity.getWorld().isRemote) {
             ItemStack journalSlot = this.craftMatrix.getStackInSlot(MagicalWorkbenchCraftingInventory.JOURNAL_SLOT);
             if (journalSlot.getItem() == ModItems.MAGICAL_JOURNAL.get()) {
-                ((ClientAdvancementCache) AdvancementCache.getClientInstance()).loadAllForPlayer(MagicalJournalItem.getOwnerUUID(journalSlot));
+                AdvancementCache.getClientInstance().loadAllForPlayer(MagicalJournalItem.getOwnerUUID(journalSlot));
             }
         }
     }
@@ -210,18 +211,24 @@ public class MagicalWorkbenchContainer extends Container {
         if (!worldIn.isRemote) {
             ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) playerIn;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<ShapedWorkbenchRecipe> optional = worldIn.getServer().getRecipeManager().getRecipe(ModCrafting.RecipeTypes.WORKBENCH_SHAPED, inventoryIn, worldIn);
-            if (optional.isPresent()) {
-                ShapedWorkbenchRecipe recipe = optional.get();
+
+            // Shaped recipes
+            Optional<ShapedWorkbenchRecipe> shapedRecipe = worldIn.getServer().getRecipeManager().getRecipe(ModCrafting.RecipeTypes.WORKBENCH_SHAPED, inventoryIn, worldIn);
+            if (shapedRecipe.isPresent()) {
+                ShapedWorkbenchRecipe recipe = shapedRecipe.get();
                 if (inventoryResult.canUseRecipe(worldIn, serverplayerentity, recipe)) {
                     itemstack = recipe.getCraftingResult(inventoryIn);
                 }
             }
-//            if (ItemStack.areItemsEqual(inventoryIn.getStackInSlot(3), new ItemStack(Items.DIAMOND, 2))
-//                    && inventoryIn.getStackInSlot(3).getCount() >= 2
-//                    && IntStream.of(0,1,2,4,5,6).allMatch(i -> inventoryIn.getStackInSlot(i).isEmpty())) {
-//                itemstack = new ItemStack(Items.DIAMOND_SWORD);
-//            }
+
+            // Shapeless recipes
+            Optional<ShapelessWorkbenchRecipe> shapelessRecipe = worldIn.getServer().getRecipeManager().getRecipe(ModCrafting.RecipeTypes.WORKBENCH_SHAPELESS, inventoryIn, worldIn);
+            if (shapelessRecipe.isPresent()) {
+                ShapelessWorkbenchRecipe recipe = shapelessRecipe.get();
+                if (inventoryResult.canUseRecipe(worldIn, serverplayerentity, recipe)) {
+                    itemstack = recipe.getCraftingResult(inventoryIn);
+                }
+            }
 
             inventoryResult.setInventorySlotContents(0, itemstack);
             serverplayerentity.connection.sendPacket(new SSetSlotPacket(id, 0, itemstack));

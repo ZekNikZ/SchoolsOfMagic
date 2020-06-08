@@ -27,10 +27,14 @@ public class ModCrafting {
         public static final DeferredRegister<IRecipeSerializer<?>> RECIPE_SERIALIZERS = new DeferredRegister<>(ForgeRegistries.RECIPE_SERIALIZERS, GlobalConstants.MODID);
 
         public static final RegistryObject<IRecipeSerializer<?>> WORKBENCH_SHAPED = RECIPE_SERIALIZERS.register("workbench_shaped", ShapedWorkbenchRecipe.Serializer::new);
+
+        public static final RegistryObject<IRecipeSerializer<?>> WORKBENCH_SHAPELESS = RECIPE_SERIALIZERS.register("workbench_shapeless", ShapelessWorkbenchRecipe.Serializer::new);
     }
 
     public static class RecipeTypes {
         public static final ModRecipeType<ShapedWorkbenchRecipe> WORKBENCH_SHAPED = new ModRecipeType<ShapedWorkbenchRecipe>("workbench_shaped");
+
+        public static final ModRecipeType<ShapelessWorkbenchRecipe> WORKBENCH_SHAPELESS = new ModRecipeType<ShapelessWorkbenchRecipe>("workbench_shapeless");
 
         private static class ModRecipeType<T extends IRecipe<?>> implements IRecipeType<T> {
             private final String id;

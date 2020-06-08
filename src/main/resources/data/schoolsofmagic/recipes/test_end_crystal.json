@@ -1,0 +1,25 @@
+{
+  "type": "schoolsofmagic:workbench_shapeless",
+  "center": {
+    "tag": "forge:gems/diamond"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "tag": "forge:ingots/iron"
+    }
+  ],
+  "center_ingredient_must_be_in_center": true,
+  "requires_journal": false,
+  "required_advancements": [
+    "schoolsofmagic:test/test_nether_star",
+    "schoolsofmagic:schools/join_school_arcane"
+  ],
+  "advancement_mode": "ALL",
+  "result": {
+    "item": "minecraft:end_crystal",
+    "count": 3
+  }
+}

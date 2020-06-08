@@ -7,9 +7,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
 import dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory;
 import dev.mattrm.schoolsofmagic.common.item.MagicalJournalItem;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.*;
 import net.minecraft.network.PacketBuffer;
@@ -20,12 +22,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory.CENTER_SLOT;
 import static dev.mattrm.schoolsofmagic.common.inventory.MagicalWorkbenchCraftingInventory.NUM_SLOTS;
 
-public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingInventory> {
+public class ShapelessWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingInventory> {
     private NonNullList<Ingredient> ingredients;
     private final ItemStack recipeOutput;
     private final ResourceLocation id;
@@ -33,8 +38,9 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
     private final boolean requiresJournal;
     private final String[] requiredAdvancements;
     private final RecipeAdvancementMode advancementMode;
+    private final boolean centerMustBeInCenter;
 
-    private ShapedWorkbenchRecipe(final ResourceLocation id, final String group, final NonNullList<Ingredient> ingredients, final ItemStack recipeOutput, final boolean requiresJournal, final String[] requiredAdvancements, final RecipeAdvancementMode advancementMode) {
+    private ShapelessWorkbenchRecipe(final ResourceLocation id, final String group, final NonNullList<Ingredient> ingredients, final ItemStack recipeOutput, final boolean requiresJournal, final String[] requiredAdvancements, final RecipeAdvancementMode advancementMode, final boolean centerMustBeInCenter) {
         this.id = id;
         this.group = group;
         this.ingredients = ingredients;
@@ -43,6 +49,8 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
         this.requiresJournal = requiresJournal;
         this.requiredAdvancements = requiredAdvancements;
         this.advancementMode = advancementMode;
+
+        this.centerMustBeInCenter = centerMustBeInCenter;
     }
 
     @Override
@@ -58,17 +66,41 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
      */
     @Override
     public boolean matches(MagicalWorkbenchCraftingInventory inv, World worldIn) {
-        boolean flag = false;
+        NonNullList<ItemStack> contents = NonNullList.create();
 
-        for (int i = 0; i < 6; i++) {
-            boolean result = this.checkRecipeWithRotation(inv, worldIn, i);
-            if (result) {
-                flag = true;
-                break;
+        for (int i = 0; i < NUM_SLOTS; i++) {
+            if (i == CENTER_SLOT && this.centerMustBeInCenter) continue;
+
+            ItemStack itemStack = inv.getStackInSlot(i);
+            if (!itemStack.isEmpty()) {
+                contents.add(new ItemStack(itemStack.getItem()));
             }
         }
 
-        if (!flag) {
+        int start = 0;
+        if (this.centerMustBeInCenter) {
+            start = 1;
+            if (!ingredients.get(0).test(inv.getStackInSlot(CENTER_SLOT))) {
+                return false;
+            }
+        }
+
+        for (int i = start; i < ingredients.size(); i++) {
+            Ingredient ingredient = ingredients.get(i);
+            int j;
+            for (j = 0; j < contents.size(); j++) {
+                if (ingredient.test(contents.get(j))) {
+                    break;
+                }
+            }
+            if (j == contents.size()) {
+                return false;
+            } else {
+                contents.remove(j);
+            }
+        }
+
+        if (contents.size() != 0) {
             return false;
         }
 
@@ -83,23 +115,6 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
                     return true;
                 }
             } else {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static final ImmutableList<Integer> slots = ImmutableList.of(0, 1, 4, 6, 5, 2);
-    private int rotateSlotNo(int slot, int rotation) {
-        if (slot == CENTER_SLOT) return CENTER_SLOT;
-
-        return slots.get((slots.indexOf(slot) + rotation + slots.size()) % slots.size());
-    }
-
-    private boolean checkRecipeWithRotation(MagicalWorkbenchCraftingInventory inv, World worldIn, int rotation) {
-        for (int i = 0; i < NUM_SLOTS; i++) {
-            if (!this.ingredients.get(i).test(inv.getStackInSlot(rotateSlotNo(i, rotation)))) {
                 return false;
             }
         }
@@ -146,12 +161,16 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
 
     @Override
     public IRecipeSerializer<?> getSerializer() {
-        return ModCrafting.Recipes.WORKBENCH_SHAPED.get();
+        return ModCrafting.Recipes.WORKBENCH_SHAPELESS.get();
     }
 
     @Override
     public IRecipeType<?> getType() {
-        return ModCrafting.RecipeTypes.WORKBENCH_SHAPED;
+        return ModCrafting.RecipeTypes.WORKBENCH_SHAPELESS;
+    }
+
+    public boolean centerMustBeInCenter() {
+        return centerMustBeInCenter;
     }
 
     public boolean requiresJournal() {
@@ -166,78 +185,25 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
         return advancementMode;
     }
 
-    private static String[] patternFromJson(JsonArray jsonArr) {
-        String[] resultArr = new String[jsonArr.size()];
-        if (resultArr.length != 3) {
-            throw new JsonSyntaxException("Invalid pattern: exactly 3 rows are required");
-        } else {
-            for (int i = 0; i < 3; ++i) {
-                String s = JSONUtils.getString(jsonArr.get(i), "pattern[" + i + "]");
+    private static NonNullList<Ingredient> deserializeIngredients(JsonObject json) {
+        JsonObject center = JSONUtils.getJsonObject(json, "center");
+        JsonArray ingredients = JSONUtils.getJsonArray(json, "ingredients");
+        NonNullList<Ingredient> resultList = NonNullList.create();
 
-                if (i == 1 && s.length() != 3) {
-                    throw new JsonSyntaxException("Invalid pattern: row 2 must contain exactly 3 columns");
-                } else if (i != 1 && s.length() != 2) {
-                    throw new JsonSyntaxException("Invalid pattern: row " + (i + 1) + " must contain exactly 2 columns");
-                }
+        resultList.add(Ingredient.deserialize(center));
 
-                resultArr[i] = s;
-            }
-
-            return resultArr;
+        for (JsonElement ingredient : ingredients) {
+            resultList.add(Ingredient.deserialize(ingredient));
         }
+
+        return resultList;
     }
 
-    private static Map<String, Ingredient> deserializeKey(JsonObject json) {
-        Map<String, Ingredient> map = Maps.newHashMap();
-
-        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
-            if (entry.getKey().length() != 1) {
-                throw new JsonSyntaxException("Invalid key entry: '" + (String) entry.getKey() + "' is an invalid symbol (must be 1 character only).");
-            }
-
-            if (" ".equals(entry.getKey())) {
-                throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
-            }
-
-            map.put(entry.getKey(), Ingredient.deserialize(entry.getValue()));
-        }
-
-        map.put(" ", Ingredient.EMPTY);
-        return map;
-    }
-
-    private static NonNullList<Ingredient> deserializeIngredients(String[] pattern, Map<String, Ingredient> keys) {
-        NonNullList<Ingredient> resultList = NonNullList.withSize(7, Ingredient.EMPTY);
-        Set<String> set = Sets.newHashSet(keys.keySet());
-        set.remove(" ");
-
-        for (int row = 0; row < pattern.length; ++row) {
-            for (int col = 0; col < pattern[row].length(); ++col) {
-                String s = pattern[row].substring(col, col + 1);
-                Ingredient ingredient = keys.get(s);
-                if (ingredient == null) {
-                    throw new JsonSyntaxException("Pattern references symbol '" + s + "' but it's not defined in the key");
-                }
-
-                set.remove(s);
-                resultList.set(col + row * (row + 3) / 2, ingredient);
-            }
-        }
-
-        if (!set.isEmpty()) {
-            throw new JsonSyntaxException("Key defines symbols that aren't used in pattern: " + set);
-        } else {
-            return resultList;
-        }
-    }
-
-    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<ShapedWorkbenchRecipe> {
+    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<ShapelessWorkbenchRecipe> {
         @Override
-        public ShapedWorkbenchRecipe read(final ResourceLocation recipeId, final JsonObject json) {
+        public ShapelessWorkbenchRecipe read(final ResourceLocation recipeId, final JsonObject json) {
             String group = JSONUtils.getString(json, "group", "");
-            Map<String, Ingredient> map = ShapedWorkbenchRecipe.deserializeKey(JSONUtils.getJsonObject(json, "key"));
-            String[] astring = ShapedWorkbenchRecipe.patternFromJson(JSONUtils.getJsonArray(json, "pattern"));
-            NonNullList<Ingredient> ingredients = ShapedWorkbenchRecipe.deserializeIngredients(astring, map);
+            NonNullList<Ingredient> ingredients = ShapelessWorkbenchRecipe.deserializeIngredients(json);
             ItemStack result = ShapedRecipe.deserializeItem(JSONUtils.getJsonObject(json, "result"));
 
             boolean requiresJournal = JSONUtils.getBoolean(json, "requires_journal");
@@ -248,12 +214,14 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
             }
             RecipeAdvancementMode mode = RecipeAdvancementMode.valueOf(JSONUtils.getString(json, "advancement_mode"));
 
-            return new ShapedWorkbenchRecipe(recipeId, group, ingredients, result, requiresJournal, requiredAdvancements, mode);
+            boolean centerMustBeInCenter = JSONUtils.getBoolean(json, "center_ingredient_must_be_in_center");
+
+            return new ShapelessWorkbenchRecipe(recipeId, group, ingredients, result, requiresJournal, requiredAdvancements, mode, centerMustBeInCenter);
         }
 
         @Nullable
         @Override
-        public ShapedWorkbenchRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+        public ShapelessWorkbenchRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
             final String group = buffer.readString(Short.MAX_VALUE);
             final int numIngredients = buffer.readVarInt();
             final NonNullList<Ingredient> ingredients = NonNullList.withSize(numIngredients, Ingredient.EMPTY);
@@ -272,11 +240,13 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
                 requiredAdvancements[i] = buffer.readString(Short.MAX_VALUE);
             }
 
-            return new ShapedWorkbenchRecipe(recipeId, group, ingredients, result, requiresJournal, requiredAdvancements, advancementMode);
+            final boolean centerInCenter = buffer.readBoolean();
+
+            return new ShapelessWorkbenchRecipe(recipeId, group, ingredients, result, requiresJournal, requiredAdvancements, advancementMode, centerInCenter);
         }
 
         @Override
-        public void write(PacketBuffer buffer, ShapedWorkbenchRecipe recipe) {
+        public void write(PacketBuffer buffer, ShapelessWorkbenchRecipe recipe) {
             buffer.writeString(recipe.getGroup());
             buffer.writeVarInt(recipe.getIngredients().size());
 
@@ -293,6 +263,8 @@ public class ShapedWorkbenchRecipe implements IRecipe<MagicalWorkbenchCraftingIn
             for (final String advancement : recipe.requiredAdvancements) {
                 buffer.writeString(advancement);
             }
+
+            buffer.writeBoolean(recipe.centerMustBeInCenter());
         }
     }
 }

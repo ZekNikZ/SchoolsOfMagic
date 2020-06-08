@@ -1,4 +1,4 @@
-package dev.mattrm.schoolsofmagic.common.state.properties;
+package dev.mattrm.schoolsofmagic.common.block.properties;
 
 import net.minecraft.util.IStringSerializable;
 

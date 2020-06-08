@@ -1,0 +1,7 @@
+{
+  "type": "schoolsofmagic:school/normal",
+  "icon": "schoolsofmagic:school/water/icon",
+  "main_color": "BLUE",
+  "secondary_color": "WHITE",
+  "journal_background": "schoolsofmagic:school/water/background"
+}

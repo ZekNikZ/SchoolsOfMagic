@@ -1,0 +1,34 @@
+{
+  "type": "schoolsofmagic:workbench_shapeless",
+  "center": {
+    "item": "minecraft:coal"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "item": "minecraft:coal"
+    }
+  ],
+  "center_ingredient_must_be_in_center": false,
+  "requires_journal": true,
+  "required_advancements": [
+    "schoolsofmagic:test/test_nether_star",
+    "schoolsofmagic:schools/join_school_arcane"
+  ],
+  "advancement_mode": "ALL",
+  "result": {
+    "item": "minecraft:diamond",
+    "count": 1
+  }
+}

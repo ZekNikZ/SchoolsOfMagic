@@ -1,0 +1,7 @@
+{
+  "type": "schoolsofmagic:unlock/recipe",
+  "school": "schoolsofmagic:water",
+  "icon_item": "minecraft:nether_star",
+  "parents": [],
+  "linked_advancement": "schoolsofmagic:test_nether_star"
+}

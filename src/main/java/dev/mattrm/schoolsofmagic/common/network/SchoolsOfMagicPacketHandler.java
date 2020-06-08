@@ -1,7 +1,7 @@
-package dev.mattrm.schoolsofmagic.common.networking;
+package dev.mattrm.schoolsofmagic.common.network;
 
 import dev.mattrm.schoolsofmagic.GlobalConstants;
-import dev.mattrm.schoolsofmagic.common.networking.packet.AdvancementProgressSyncMessage;
+import dev.mattrm.schoolsofmagic.common.network.packet.AdvancementProgressSyncMessage;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;

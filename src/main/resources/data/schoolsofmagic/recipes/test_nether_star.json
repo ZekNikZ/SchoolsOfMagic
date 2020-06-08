@@ -16,8 +16,7 @@
       "item": "minecraft:emerald"
     },
     "D": {
-      "item": "minecraft:diamond",
-      "count": 2
+      "item": "minecraft:diamond"
     },
     "G": {
       "item": "minecraft:gold_ingot"

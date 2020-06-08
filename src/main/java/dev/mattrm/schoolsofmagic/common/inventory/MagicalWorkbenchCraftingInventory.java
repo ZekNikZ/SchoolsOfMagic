@@ -14,6 +14,7 @@ import java.util.Iterator;
 
 public class MagicalWorkbenchCraftingInventory implements IInventory {
     public static final int NUM_SLOTS = 7;
+    public static final int CENTER_SLOT = 3;
     public static final int JOURNAL_SLOT = NUM_SLOTS;
 
     private final NonNullList<ItemStack> stackList;

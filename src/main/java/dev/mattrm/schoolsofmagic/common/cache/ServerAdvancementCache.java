@@ -1,15 +1,14 @@
 package dev.mattrm.schoolsofmagic.common.cache;
 
 import com.mojang.authlib.GameProfile;
-import dev.mattrm.schoolsofmagic.common.networking.SchoolsOfMagicPacketHandler;
-import dev.mattrm.schoolsofmagic.common.networking.packet.AdvancementProgressSyncMessage;
+import dev.mattrm.schoolsofmagic.common.network.SchoolsOfMagicPacketHandler;
+import dev.mattrm.schoolsofmagic.common.network.packet.AdvancementProgressSyncMessage;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,13 +1,10 @@
-package dev.mattrm.schoolsofmagic.common.networking.packet;
+package dev.mattrm.schoolsofmagic.common.network.packet;
 
-import com.google.gson.internal.$Gson$Preconditions;
 import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
-import dev.mattrm.schoolsofmagic.common.cache.ClientAdvancementCache;
 import dev.mattrm.schoolsofmagic.common.cache.ServerAdvancementCache;
-import dev.mattrm.schoolsofmagic.common.networking.SchoolsOfMagicPacketHandler;
+import dev.mattrm.schoolsofmagic.common.network.SchoolsOfMagicPacketHandler;
 import dev.mattrm.schoolsofmagic.common.util.DoubleKeyMap;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkDirection;
