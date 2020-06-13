@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
-public abstract class ModDataJsonReloadListener<D extends JsonData<T>, T extends JsonDataType<D>> extends JsonReloadListener {
+public abstract class ModDataJsonReloadListener<D extends JsonData<T>, T extends JsonDataType<D>> extends JsonReloadListener implements ITypeHolder<T> {
     protected static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -38,7 +38,13 @@ public abstract class ModDataJsonReloadListener<D extends JsonData<T>, T extends
         return type.deserialize(id, json);
     }
 
+    @Override
     public void registerType(ResourceLocation name, T type) {
         this.types.put(name, type);
+    }
+
+    @Override
+    public T getType(ResourceLocation id) {
+        return this.types.get(id);
     }
 }

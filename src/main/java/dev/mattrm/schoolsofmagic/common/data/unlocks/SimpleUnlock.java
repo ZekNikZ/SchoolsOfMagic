@@ -13,8 +13,8 @@ import java.util.List;
 public class SimpleUnlock extends Unlock {
     protected ItemStack iconItemStack;
 
-    public SimpleUnlock(@Nonnull ResourceLocation id, @Nonnull School school, @Nonnull ResourceLocation icon, @Nonnull UnlockType type, @Nonnull List<ResourceLocation> parents, @Nonnull ResourceLocation linkedAdvancement) {
-        super(id, school, icon, type, parents, linkedAdvancement);
+    public SimpleUnlock(@Nonnull ResourceLocation id, @Nonnull School school, @Nonnull ResourceLocation icon, @Nonnull UnlockType type, @Nonnull List<ResourceLocation> parents, @Nonnull ResourceLocation linkedAdvancement, @Nonnull int priority, @Nonnull int points) {
+        super(id, school, icon, type, parents, linkedAdvancement, priority, points);
 
         this.iconItemStack = new ItemStack(GameRegistry.findRegistry(Item.class).getValue(icon));
     }

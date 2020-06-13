@@ -1,9 +1,11 @@
 package dev.mattrm.schoolsofmagic.common.item;
 
-import com.mojang.util.UUIDTypeAdapter;
+import dev.mattrm.schoolsofmagic.client.gui.JournalScreen;
 import dev.mattrm.schoolsofmagic.common.cache.UsernameCache;
+import dev.mattrm.schoolsofmagic.common.util.lang.GuiTranslation;
 import dev.mattrm.schoolsofmagic.common.util.lang.Styles;
 import dev.mattrm.schoolsofmagic.common.util.lang.TooltipTranslation;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -40,11 +42,13 @@ public class MagicalJournalItem extends Item {
             ItemStack itemStack = player.getHeldItem(hand);
             CompoundNBT nbt = itemStack.getOrCreateTag();
 
-            if (MagicalJournalItem.getOwner(itemStack) == null) {
-                // TODO: check if this is the proper way to use UUID
+            String owner = MagicalJournalItem.getOwner(itemStack);
+            if (owner == null) {
                 nbt.putString("Owner", player.getGameProfile().getId().toString());
             } else {
-                // TODO: Open GUI
+                if (world.isRemote) {
+                    Minecraft.getInstance().displayGuiScreen(new JournalScreen(MagicalJournalItem.getOwnerUUID(itemStack), GuiTranslation.JOURNAL_GUI.componentTranslation(owner)));
+                }
             }
         }
 
@@ -102,7 +106,7 @@ public class MagicalJournalItem extends Item {
     public static void addOwnerTooltip(List<ITextComponent> tooltip, String owner) {
         if (owner == null) {
             tooltip.add(TooltipTranslation.JOURNAL_NO_OWNER.componentTranslation().setStyle(Styles.RED));
-        } else if (owner.equals("__loading")){
+        } else if (owner.equals("__loading")) {
             tooltip.add(TooltipTranslation.JOURNAL_LOADING_OWNER.componentTranslation().setStyle(Styles.YELLOW.setItalic(true)));
         } else {
             tooltip.add(TooltipTranslation.JOURNAL_OWNER.componentTranslation(owner).setStyle(Styles.YELLOW));

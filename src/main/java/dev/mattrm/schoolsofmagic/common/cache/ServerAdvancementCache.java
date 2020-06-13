@@ -3,6 +3,7 @@ package dev.mattrm.schoolsofmagic.common.cache;
 import com.mojang.authlib.GameProfile;
 import dev.mattrm.schoolsofmagic.common.network.SchoolsOfMagicPacketHandler;
 import dev.mattrm.schoolsofmagic.common.network.packet.AdvancementProgressSyncMessage;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 public class ServerAdvancementCache extends AdvancementCache {
@@ -64,7 +66,11 @@ public class ServerAdvancementCache extends AdvancementCache {
 
         playerAdvancements.setPlayer(player);
 
-        this.put(uuid, advancement, playerAdvancements.getProgress(this.server.getAdvancementManager().getAdvancement(advancement)).isDone());
+        Advancement adv = this.server.getAdvancementManager().getAdvancement(advancement);
+        if (adv == null) {
+            throw new NoSuchElementException("Advancement is not registered: " + advancement);
+        }
+        this.put(uuid, advancement, playerAdvancements.getProgress(adv).isDone());
 
         this.notifyListeners(uuid, advancement);
     }

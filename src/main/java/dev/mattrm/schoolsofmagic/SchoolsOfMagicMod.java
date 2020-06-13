@@ -1,13 +1,18 @@
 package dev.mattrm.schoolsofmagic;
 
+import dev.mattrm.schoolsofmagic.client.data.ClientDataManager;
+import dev.mattrm.schoolsofmagic.client.data.ClientSchoolManager;
+import dev.mattrm.schoolsofmagic.client.data.unlocks.ClientUnlockNodesManager;
 import dev.mattrm.schoolsofmagic.client.misc.ModItemGroups;
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
 import dev.mattrm.schoolsofmagic.common.cache.*;
 import dev.mattrm.schoolsofmagic.common.data.JsonDataType;
 import dev.mattrm.schoolsofmagic.common.data.ModDataJsonReloadListener;
 import dev.mattrm.schoolsofmagic.common.data.schools.SchoolManager;
+import dev.mattrm.schoolsofmagic.common.data.schools.types.SchoolType;
 import dev.mattrm.schoolsofmagic.common.data.schools.types.SimpleSchoolType;
 import dev.mattrm.schoolsofmagic.common.data.unlocks.types.SimpleUnlockType;
+import dev.mattrm.schoolsofmagic.common.data.unlocks.types.UnlockType;
 import dev.mattrm.schoolsofmagic.common.inventory.container.ModContainerTypes;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
 import dev.mattrm.schoolsofmagic.common.network.SchoolsOfMagicPacketHandler;
@@ -84,8 +89,11 @@ public class SchoolsOfMagicMod {
         // Force Java to load packet system
         SchoolsOfMagicPacketHandler.setup();
 
-        this.registerType(UnlockManager.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/recipe")));
-        this.registerType(SchoolManager.class, new SimpleSchoolType(new ResourceLocation(GlobalConstants.MODID, "school/normal")));
+        this.registerType(SchoolType.class, new SimpleSchoolType(new ResourceLocation(GlobalConstants.MODID, "school/normal")));
+        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/recipe"), "gui/journal/widgets.png", 0, 0));
+        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/spell"), "gui/journal/widgets.png", 26, 0));
+        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/ability"), "gui/journal/widgets.png", 52, 0));
+        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/ritual"), "gui/journal/widgets.png", 78, 0));
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -95,6 +103,10 @@ public class SchoolsOfMagicMod {
         LOGGER.info("Initializing client advancement cache...");
         AdvancementCache.invalidateClient();
         AdvancementCache.initClientCache(new ClientAdvancementCache());
+
+        // Setup managers
+        this.registerClientJSONDataManager("schools", this.clientSchoolManager = new ClientSchoolManager(), SchoolType.class);
+        this.registerClientJSONDataManager("unlocks", this.clientUnlockNodesManager = new ClientUnlockNodesManager(), UnlockType.class);
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event) {
@@ -108,17 +120,23 @@ public class SchoolsOfMagicMod {
     @SubscribeEvent
     public void onServerAboutToStart(FMLServerAboutToStartEvent event) {
         LOGGER.info("Registering JSON reload listeners...");
-        this.registerModJSONReloadListener("schools", event.getServer(), this.schoolManager = new SchoolManager());
-        this.registerModJSONReloadListener("unlocks", event.getServer(), this.unlockManager = new UnlockManager());
+        this.registerModJSONReloadListener("schools", event.getServer(), this.schoolManager = new SchoolManager(), SchoolType.class);
+        this.registerModJSONReloadListener("unlocks", event.getServer(), this.unlockManager = new UnlockManager(), UnlockType.class);
     }
 
-    private <T extends JsonDataType<?>> void registerModJSONReloadListener(String type, MinecraftServer server, ModDataJsonReloadListener<?, T> listener) {
+    private <T extends JsonDataType<?>> void registerModJSONReloadListener(String type, MinecraftServer server, ModDataJsonReloadListener<?, T> listener, Class<T> clazz) {
         LOGGER.info("Registering '" + type + "' reload listener...");
         server.getResourceManager().addReloadListener(listener);
-        for (JsonDataType<?> typeToRegister : typesToRegister.get(listener.getClass())) {
+        for (JsonDataType<?> typeToRegister : typesToRegister.get(clazz)) {
             listener.registerType(typeToRegister.getId(), (T) typeToRegister);
         }
+    }
 
+    private <T extends JsonDataType<?>> void registerClientJSONDataManager(String type, ClientDataManager<?, T, ?> manager, Class<T> clazz) {
+        LOGGER.info("Initializing types of client manager '" + type + "'...");
+        for (JsonDataType<?> typeToRegister : typesToRegister.get(clazz)) {
+            manager.registerType(typeToRegister.getId(), (T) typeToRegister);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
@@ -132,19 +150,9 @@ public class SchoolsOfMagicMod {
     public void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         LOGGER.info("Sending new client current cache.");
         AdvancementCache.getServerInstance().syncClient((ServerPlayerEntity) event.getEntity());
+        this.getSchoolManager().syncClient((ServerPlayerEntity) event.getEntity());
+        this.getUnlockManager().syncClient((ServerPlayerEntity) event.getEntity());
     }
-
-//    @SubscribeEvent
-//    public void onWorldJoin(EntityJoinWorldEvent event) {
-//        if (event.getEntity() instanceof PlayerEntity && event.getWorld().isRemote) {
-//            LOGGER.info("Initializing client advancement cache...");
-//            AdvancementCache.invalidateClient();
-//            AdvancementCache.initClientCache(new ClientAdvancementCache());
-//        } else if (event.getEntity() instanceof ServerPlayerEntity && !event.getWorld().isRemote) {
-//            LOGGER.info("Sending new client current cache.");
-//            AdvancementCache.getServerInstance().syncClient((ServerPlayerEntity) event.getEntity());
-//        }
-//    }
 
     // TODO: this works for singleplayer not multiplayer
     @SubscribeEvent
@@ -178,25 +186,39 @@ public class SchoolsOfMagicMod {
     }
 
     private SchoolManager schoolManager;
+    private UnlockManager unlockManager;
+    private ClientSchoolManager clientSchoolManager;
+    private ClientUnlockNodesManager clientUnlockNodesManager;
 
     public SchoolManager getSchoolManager() {
         return schoolManager;
     }
 
-    private UnlockManager unlockManager;
-
     public UnlockManager getUnlockManager() {
         return unlockManager;
     }
 
-    private Map<Class<? extends ModDataJsonReloadListener<?, ?>>, List<JsonDataType<?>>> typesToRegister = new HashMap<>();
+    public ClientSchoolManager getClientSchoolManager() {
+        return clientSchoolManager;
+    }
 
-    public <C extends ModDataJsonReloadListener<?, T>, T extends JsonDataType<?>> void registerType(Class<C> clazz, T type) {
-        LOGGER.info("Registering JSON data type for manager " + clazz.getName() + " with id " + type.getId());
+    public ClientUnlockNodesManager getClientUnlockManager() {
+        return clientUnlockNodesManager;
+    }
+
+    private Map<Class<? extends JsonDataType<?>>, List<JsonDataType<?>>> typesToRegister = new HashMap<>();
+
+    public <T extends JsonDataType<?>> void registerType(Class<T> clazz, T type) {
+        LOGGER.info("Registering JSON data type for type group '" + clazz.getName() + "' with id " + type.getId());
         List<JsonDataType<?>> l = typesToRegister.getOrDefault(clazz, new ArrayList<>());
         l.add(type);
         typesToRegister.put(clazz, l);
     }
+
+    public JsonDataType<?> getRegisteredType(Class<? extends JsonDataType<?>> clazz, ResourceLocation id) {
+        return typesToRegister.get(clazz).stream().filter(type -> type.getId().equals(id)).findFirst().get();
+    }
+
 
     public static SchoolsOfMagicMod getInstance() {
         if (instance == null) {

@@ -1,0 +1,9 @@
+{
+  "type": "schoolsofmagic:unlock/recipe",
+  "school": "schoolsofmagic:fire",
+  "icon_item": "minecraft:nether_star",
+  "parents": ["schoolsofmagic:b"],
+  "linked_advancement": "schoolsofmagic:f",
+  "points": 0,
+  "priority": -1
+}

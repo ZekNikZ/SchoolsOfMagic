@@ -7,5 +7,6 @@
   "tooltip.schoolsofmagic.journal.no_owner": "Right-click to bind to you",
   "tooltip.schoolsofmagic.journal.loading_owner": "Loading username...",
   "tooltip.schoolsofmagic.journal.owner": "Owner: %s",
-  "container.schoolsofmagic.magical_workbench.name": "§r§fMagical Workbench"
+  "container.schoolsofmagic.magical_workbench.name": "§r§fMagical Workbench",
+  "gui.schoolsofmagic.journal": "%s's Magical Journal"
 }

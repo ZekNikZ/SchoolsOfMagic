@@ -1,0 +1,8 @@
+{
+  "type": "schoolsofmagic:school/normal",
+  "icon": "schoolsofmagic:textures/som_school/fire/icon.png",
+  "main_color": "BLUE",
+  "secondary_color": "WHITE",
+  "journal_background": "schoolsofmagic:textures/som_school/fire/background.png",
+  "priority": 20
+}

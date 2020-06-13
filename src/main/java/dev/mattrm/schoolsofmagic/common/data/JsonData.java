@@ -1,8 +1,9 @@
 package dev.mattrm.schoolsofmagic.common.data;
 
+import dev.mattrm.schoolsofmagic.common.network.IPacketSerializer;
 import net.minecraft.util.ResourceLocation;
 
-public abstract class JsonData<T extends JsonDataType<?>> {
+public abstract class JsonData<T extends JsonDataType<?>> implements IPacketSerializer {
     private ResourceLocation id;
     private T type;
 

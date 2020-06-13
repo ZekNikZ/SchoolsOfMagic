@@ -1,9 +1,10 @@
 package dev.mattrm.schoolsofmagic.common.data;
 
 import com.google.gson.JsonObject;
+import dev.mattrm.schoolsofmagic.common.network.IPacketDeserializer;
 import net.minecraft.util.ResourceLocation;
 
-public abstract class JsonDataType<T extends JsonData<?>> {
+public abstract class JsonDataType<T extends JsonData<?>> implements IPacketDeserializer<T> {
     private final ResourceLocation id;
 
     public JsonDataType(ResourceLocation id) {

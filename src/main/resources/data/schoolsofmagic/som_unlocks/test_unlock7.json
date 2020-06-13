@@ -1,0 +1,8 @@
+{
+  "type": "schoolsofmagic:unlock/ability",
+  "school": "schoolsofmagic:water",
+  "icon_item": "minecraft:nether_star",
+  "parents": ["schoolsofmagic:test_unlock6", "schoolsofmagic:test_unlock4"],
+  "linked_advancement": "schoolsofmagic:test/test_nether_star",
+  "points": 0
+}

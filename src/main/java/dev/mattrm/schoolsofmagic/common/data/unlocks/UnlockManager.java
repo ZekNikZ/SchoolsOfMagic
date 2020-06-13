@@ -6,11 +6,16 @@ import com.google.gson.*;
 import dev.mattrm.schoolsofmagic.common.data.ModDataJsonReloadListener;
 import dev.mattrm.schoolsofmagic.common.data.schools.School;
 import dev.mattrm.schoolsofmagic.common.data.unlocks.types.UnlockType;
+import dev.mattrm.schoolsofmagic.common.network.SchoolsOfMagicPacketHandler;
+import dev.mattrm.schoolsofmagic.common.network.packet.AdvancementProgressSyncMessage;
+import dev.mattrm.schoolsofmagic.common.network.packet.DataSyncMessage;
 import net.minecraft.client.resources.JsonReloadListener;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,9 +46,7 @@ public class UnlockManager extends ModDataJsonReloadListener<Unlock, UnlockType>
                     LOGGER.info("Skipping loading unlock {} as it's serializer returned null", resourceLocation);
                 }
 
-                map.computeIfAbsent(unlock.getSchool(), (p_223391_0_) -> {
-                    return ImmutableMap.builder();
-                }).put(resourceLocation, unlock);
+                map.computeIfAbsent(unlock.getSchool(), (p_223391_0_) -> ImmutableMap.builder()).put(resourceLocation, unlock);
             } catch (IllegalArgumentException | JsonParseException jsonparseexception) {
                 LOGGER.error("Parsing error loading unlock {}", resourceLocation, jsonparseexception);
             }
@@ -51,5 +54,17 @@ public class UnlockManager extends ModDataJsonReloadListener<Unlock, UnlockType>
 
         this.unlocks = map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, (entry) -> entry.getValue().build()));
         LOGGER.info("Loaded {} unlocks", map.size());
+
+        SchoolsOfMagicPacketHandler.getInstance().send(
+                PacketDistributor.ALL.noArg(),
+                new DataSyncMessage.UnlockSync(this.unlocks)
+        );
+    }
+
+    public void syncClient(ServerPlayerEntity player) {
+        SchoolsOfMagicPacketHandler.getInstance().send(
+                PacketDistributor.PLAYER.with(() -> player),
+                new DataSyncMessage.UnlockSync(this.unlocks)
+        );
     }
 }

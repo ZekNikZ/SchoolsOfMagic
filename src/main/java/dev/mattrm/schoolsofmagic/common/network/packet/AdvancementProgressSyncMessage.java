@@ -1,5 +1,7 @@
 package dev.mattrm.schoolsofmagic.common.network.packet;
 
+import dev.mattrm.schoolsofmagic.SchoolsOfMagicMod;
+import dev.mattrm.schoolsofmagic.client.data.unlocks.ClientUnlockNodesManager;
 import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
 import dev.mattrm.schoolsofmagic.common.cache.ServerAdvancementCache;
 import dev.mattrm.schoolsofmagic.common.network.SchoolsOfMagicPacketHandler;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -129,6 +132,12 @@ public class AdvancementProgressSyncMessage {
 
             ctx.get().enqueueWork(() -> {
                 AdvancementCache.getClientInstance().put(message.getUUID(), message.getAdvancement(), message.getProgress());
+                ClientUnlockNodesManager manager = SchoolsOfMagicMod.getInstance().getClientUnlockManager();
+                LOGGER.info("CT: {} {}", manager.getCurrentlyTracking(), message.getUUID());
+                if (Objects.equals(manager.getCurrentlyTracking(), message.getUUID())) {
+                    LOGGER.info("Advancement update for open unlock manager found: " + message.getAdvancement());
+                    manager.reloadAllStates(message.getAdvancement());
+                }
             });
 
             ctx.get().setPacketHandled(true);
@@ -234,9 +243,13 @@ public class AdvancementProgressSyncMessage {
             LOGGER.info("Handling advancement sync-all from server.");
 
             ctx.get().enqueueWork(() -> {
+                ClientUnlockNodesManager manager = SchoolsOfMagicMod.getInstance().getClientUnlockManager();
                 AdvancementCache.invalidateClient();
                 message.getProgress().getDelegate().forEach((key, value) -> {
                     AdvancementCache.getClientInstance().put(key.key1(), key.key2(), value);
+                    if (Objects.equals(manager.getCurrentlyTracking(), key.key1())) {
+                        manager.reloadAllStates(key.key2());
+                    }
                 });
             });
 
