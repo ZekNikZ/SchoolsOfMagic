@@ -1,0 +1,18 @@
+MAJOR.MINOR[.PATCH][-status#]
+
+MAJOR: api incompatibility (not backwards-compatible)
+MINOR: new api features that are backwards-compatible
+PATCH: bug fixes that are backwards-compatible
+
+Statuses:
+ A (Alpha): in development
+ B (Beta): full features up for testing
+ RC (Release Candidate): if no major bugs are found, this is the version
+
+Examples:
+0.1
+0.2.3
+1.0.1
+2.4-a0
+3.2.1-b2
+1.2.3-rc2
