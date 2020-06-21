@@ -12,4 +12,8 @@ public class ModContainerTypes {
 
     public static final RegistryObject<ContainerType<MagicalWorkbenchContainer>> MAGICAL_WORKBENCH = CONTAINER_TYPES
             .register("magical_workbench", () -> IForgeContainerType.create(MagicalWorkbenchContainer::new));
+
+
+    public static final RegistryObject<ContainerType<StudyTableContainer>> STUDY_TABLE = CONTAINER_TYPES
+            .register("study_table", () -> IForgeContainerType.create(StudyTableContainer::new));
 }

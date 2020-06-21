@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 
 public enum ContainerTranslation implements ITranslationProvider {
     WORKBENCH_NAME("magical_workbench.name", 0),
+    STUDY_TABLE_NAME("study_table.name", 0),
     ;
 
     private static final String PREFIX = "container.";

@@ -2,7 +2,9 @@ package dev.mattrm.schoolsofmagic.client.util;
 
 import dev.mattrm.schoolsofmagic.GlobalConstants;
 import dev.mattrm.schoolsofmagic.client.gui.MagicalWorkbenchScreen;
+import dev.mattrm.schoolsofmagic.client.gui.StudyTableScreen;
 import dev.mattrm.schoolsofmagic.common.inventory.container.ModContainerTypes;
+import dev.mattrm.schoolsofmagic.common.inventory.container.StudyTableContainer;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,5 +16,6 @@ public class ClientEventBusSubscriber {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         ScreenManager.registerFactory(ModContainerTypes.MAGICAL_WORKBENCH.get(), MagicalWorkbenchScreen::new);
+        ScreenManager.registerFactory(ModContainerTypes.STUDY_TABLE.get(), StudyTableScreen::new);
     }
 }
