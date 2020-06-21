@@ -5,25 +5,27 @@ import dev.mattrm.schoolsofmagic.client.data.ClientSchoolManager;
 import dev.mattrm.schoolsofmagic.client.data.unlocks.ClientUnlockNodesManager;
 import dev.mattrm.schoolsofmagic.client.misc.ModItemGroups;
 import dev.mattrm.schoolsofmagic.common.block.ModBlocks;
-import dev.mattrm.schoolsofmagic.common.cache.*;
+import dev.mattrm.schoolsofmagic.common.cache.AdvancementCache;
+import dev.mattrm.schoolsofmagic.common.cache.ClientAdvancementCache;
+import dev.mattrm.schoolsofmagic.common.cache.ServerAdvancementCache;
+import dev.mattrm.schoolsofmagic.common.cache.UsernameCache;
 import dev.mattrm.schoolsofmagic.common.data.JsonDataType;
 import dev.mattrm.schoolsofmagic.common.data.ModDataJsonReloadListener;
 import dev.mattrm.schoolsofmagic.common.data.schools.SchoolManager;
+import dev.mattrm.schoolsofmagic.common.data.schools.types.ModUnlockTypes;
 import dev.mattrm.schoolsofmagic.common.data.schools.types.SchoolType;
-import dev.mattrm.schoolsofmagic.common.data.schools.types.SimpleSchoolType;
-import dev.mattrm.schoolsofmagic.common.data.unlocks.types.SimpleUnlockType;
+import dev.mattrm.schoolsofmagic.common.data.unlocks.UnlockManager;
+import dev.mattrm.schoolsofmagic.common.data.unlocks.types.ModSchoolTypes;
 import dev.mattrm.schoolsofmagic.common.data.unlocks.types.UnlockType;
 import dev.mattrm.schoolsofmagic.common.inventory.container.ModContainerTypes;
 import dev.mattrm.schoolsofmagic.common.item.ModItems;
 import dev.mattrm.schoolsofmagic.common.network.SchoolsOfMagicPacketHandler;
 import dev.mattrm.schoolsofmagic.common.recipe.ModCrafting;
 import dev.mattrm.schoolsofmagic.common.tileentity.ModTileEntityTypes;
-import dev.mattrm.schoolsofmagic.common.data.unlocks.UnlockManager;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
@@ -40,13 +42,9 @@ import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(GlobalConstants.MODID)
@@ -74,6 +72,8 @@ public class SchoolsOfMagicMod {
         ModTileEntityTypes.TILE_ENTITY_TYPES.register(modEventBus);
         ModContainerTypes.CONTAINER_TYPES.register(modEventBus);
         ModCrafting.Recipes.RECIPE_SERIALIZERS.register(modEventBus);
+        ModSchoolTypes.SCHOOL_TYPES.register(modEventBus);
+        ModUnlockTypes.UNLOCK_TYPES.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -88,12 +88,6 @@ public class SchoolsOfMagicMod {
 
         // Force Java to load packet system
         SchoolsOfMagicPacketHandler.setup();
-
-        this.registerType(SchoolType.class, new SimpleSchoolType(new ResourceLocation(GlobalConstants.MODID, "school/normal")));
-        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/recipe"), "gui/journal/widgets.png", 0, 0));
-        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/spell"), "gui/journal/widgets.png", 26, 0));
-        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/ability"), "gui/journal/widgets.png", 52, 0));
-        this.registerType(UnlockType.class, new SimpleUnlockType(new ResourceLocation(GlobalConstants.MODID, "unlock/ritual"), "gui/journal/widgets.png", 78, 0));
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -124,19 +118,15 @@ public class SchoolsOfMagicMod {
         this.registerModJSONReloadListener("unlocks", event.getServer(), this.unlockManager = new UnlockManager(), UnlockType.class);
     }
 
-    private <T extends JsonDataType<?>> void registerModJSONReloadListener(String type, MinecraftServer server, ModDataJsonReloadListener<?, T> listener, Class<T> clazz) {
+    private <T extends JsonDataType<?> & IForgeRegistryEntry<T>> void registerModJSONReloadListener(String type, MinecraftServer server, ModDataJsonReloadListener<?, T> listener, Class<T> clazz) {
         LOGGER.info("Registering '" + type + "' reload listener...");
+        listener.setTypeClass(clazz);
         server.getResourceManager().addReloadListener(listener);
-        for (JsonDataType<?> typeToRegister : typesToRegister.get(clazz)) {
-            listener.registerType(typeToRegister.getId(), (T) typeToRegister);
-        }
     }
 
-    private <T extends JsonDataType<?>> void registerClientJSONDataManager(String type, ClientDataManager<?, T, ?> manager, Class<T> clazz) {
+    private <T extends JsonDataType<?> & IForgeRegistryEntry<T>> void registerClientJSONDataManager(String type, ClientDataManager<?, T, ?> manager, Class<T> clazz) {
         LOGGER.info("Initializing types of client manager '" + type + "'...");
-        for (JsonDataType<?> typeToRegister : typesToRegister.get(clazz)) {
-            manager.registerType(typeToRegister.getId(), (T) typeToRegister);
-        }
+        manager.setTypeClass(clazz);
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
@@ -205,20 +195,6 @@ public class SchoolsOfMagicMod {
     public ClientUnlockNodesManager getClientUnlockManager() {
         return clientUnlockNodesManager;
     }
-
-    private Map<Class<? extends JsonDataType<?>>, List<JsonDataType<?>>> typesToRegister = new HashMap<>();
-
-    public <T extends JsonDataType<?>> void registerType(Class<T> clazz, T type) {
-        LOGGER.info("Registering JSON data type for type group '" + clazz.getName() + "' with id " + type.getId());
-        List<JsonDataType<?>> l = typesToRegister.getOrDefault(clazz, new ArrayList<>());
-        l.add(type);
-        typesToRegister.put(clazz, l);
-    }
-
-    public JsonDataType<?> getRegisteredType(Class<? extends JsonDataType<?>> clazz, ResourceLocation id) {
-        return typesToRegister.get(clazz).stream().filter(type -> type.getId().equals(id)).findFirst().get();
-    }
-
 
     public static SchoolsOfMagicMod getInstance() {
         if (instance == null) {

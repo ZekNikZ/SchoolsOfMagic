@@ -8,8 +8,8 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 
 public class SimpleSchoolType extends SchoolType {
-    public SimpleSchoolType(ResourceLocation id) {
-        super(id);
+    public SimpleSchoolType() {
+        super();
     }
 
     @Override

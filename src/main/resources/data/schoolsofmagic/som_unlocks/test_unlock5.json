@@ -1,5 +1,5 @@
 {
-  "type": "schoolsofmagic:unlock/spell",
+  "type": "schoolsofmagic:spell",
   "school": "schoolsofmagic:water",
   "icon_item": "minecraft:nether_star",
   "parents": ["schoolsofmagic:test_unlock2"],

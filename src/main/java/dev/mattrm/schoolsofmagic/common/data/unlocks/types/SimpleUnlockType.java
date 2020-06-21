@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleUnlockType extends UnlockType {
-    public SimpleUnlockType(ResourceLocation id, ResourceLocation clientTexture, int clientTextureX, int clientTextureY) {
-        super(id, clientTexture, clientTextureX, clientTextureY);
+    public SimpleUnlockType(ResourceLocation clientTexture, int clientTextureX, int clientTextureY) {
+        super(null, clientTexture, clientTextureX, clientTextureY);
     }
 
-    public SimpleUnlockType(ResourceLocation id, String clientTexture, int clientTextureX, int clientTextureY) {
-        this(id, new ResourceLocation(GlobalConstants.MODID, "textures/" + clientTexture), clientTextureX, clientTextureY);
+    public SimpleUnlockType(String clientTexture, int clientTextureX, int clientTextureY) {
+        this(new ResourceLocation(GlobalConstants.MODID, "textures/" + clientTexture), clientTextureX, clientTextureY);
     }
 
     @Override

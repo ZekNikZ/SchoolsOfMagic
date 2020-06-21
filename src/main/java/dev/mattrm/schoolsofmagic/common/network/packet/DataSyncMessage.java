@@ -8,6 +8,7 @@ import dev.mattrm.schoolsofmagic.common.data.unlocks.types.UnlockType;
 import dev.mattrm.schoolsofmagic.common.util.PacketBufferUtils;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.Map;
@@ -41,10 +42,10 @@ public class DataSyncMessage<T> {
 
         public static UnlockSync decode(final PacketBuffer bufferIn) {
             Map<School, Map<ResourceLocation, Unlock>> map = PacketBufferUtils.readMap(bufferIn,
-                    (buffer) -> ((School) SchoolsOfMagicMod.getInstance().getRegisteredType(SchoolType.class, buffer.readResourceLocation()).readFromBuffer(buffer)),
+                    (buffer) -> ((School) GameRegistry.findRegistry(SchoolType.class).getValue(buffer.readResourceLocation()).readFromBuffer(buffer)),
                     (buffer) -> PacketBufferUtils.readMap(buffer,
                             PacketBuffer::readResourceLocation,
-                            (b) -> ((Unlock) SchoolsOfMagicMod.getInstance().getRegisteredType(UnlockType.class, b.readResourceLocation()).readFromBuffer(b))
+                            (b) -> ((Unlock) GameRegistry.findRegistry(UnlockType.class).getValue(b.readResourceLocation()).readFromBuffer(b))
                     )
             );
 
@@ -71,7 +72,7 @@ public class DataSyncMessage<T> {
         public static SchoolSync decode(final PacketBuffer bufferIn) {
             Map<ResourceLocation, School> map = PacketBufferUtils.readMap(bufferIn,
                     PacketBuffer::readResourceLocation,
-                    b -> ((School) SchoolsOfMagicMod.getInstance().getRegisteredType(SchoolType.class, b.readResourceLocation()).readFromBuffer(b))
+                    b -> ((School) GameRegistry.findRegistry(SchoolType.class).getValue(b.readResourceLocation()).readFromBuffer(b))
             );
 
             return new SchoolSync(map);

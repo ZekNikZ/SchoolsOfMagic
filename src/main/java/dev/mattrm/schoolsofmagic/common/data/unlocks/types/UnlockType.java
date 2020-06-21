@@ -5,11 +5,14 @@ import dev.mattrm.schoolsofmagic.common.data.JsonDataType;
 import dev.mattrm.schoolsofmagic.common.data.unlocks.Unlock;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public abstract class UnlockType extends JsonDataType<Unlock> {
-    private ResourceLocation clientTexture;
-    private int clientTextureX;
-    private int clientTextureY;
+import javax.annotation.Nullable;
+
+public abstract class UnlockType extends JsonDataType<Unlock> implements IForgeRegistryEntry<UnlockType> {
+    private final ResourceLocation clientTexture;
+    private final int clientTextureX;
+    private final int clientTextureY;
 
     public UnlockType(ResourceLocation id, ResourceLocation clientTexture, int clientTextureX, int clientTextureY) {
         super(id);
@@ -35,4 +38,21 @@ public abstract class UnlockType extends JsonDataType<Unlock> {
 
     @Override
     public abstract Unlock readFromBuffer(PacketBuffer buffer);
+
+    @Override
+    public UnlockType setRegistryName(ResourceLocation name) {
+        this.setId(name);
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getRegistryName() {
+        return this.getId();
+    }
+
+    @Override
+    public Class<UnlockType> getRegistryType() {
+        return UnlockType.class;
+    }
 }

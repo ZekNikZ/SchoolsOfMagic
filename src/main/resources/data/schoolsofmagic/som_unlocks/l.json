@@ -1,5 +1,5 @@
 {
-  "type": "schoolsofmagic:unlock/recipe",
+  "type": "schoolsofmagic:recipe",
   "school": "schoolsofmagic:fire",
   "icon_item": "minecraft:nether_star",
   "parents": ["schoolsofmagic:r"],

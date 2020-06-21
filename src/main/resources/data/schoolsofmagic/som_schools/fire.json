@@ -1,5 +1,5 @@
 {
-  "type": "schoolsofmagic:school/normal",
+  "type": "schoolsofmagic:normal",
   "icon": "schoolsofmagic:textures/som_school/fire/icon.png",
   "main_color": "BLUE",
   "secondary_color": "WHITE",

@@ -5,10 +5,13 @@ import dev.mattrm.schoolsofmagic.common.data.JsonDataType;
 import dev.mattrm.schoolsofmagic.common.data.schools.School;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public abstract class SchoolType extends JsonDataType<School> {
-    public SchoolType(ResourceLocation id) {
-        super(id);
+import javax.annotation.Nullable;
+
+public abstract class SchoolType extends JsonDataType<School> implements IForgeRegistryEntry<SchoolType> {
+    public SchoolType() {
+        super(null);
     }
 
     @Override
@@ -16,4 +19,21 @@ public abstract class SchoolType extends JsonDataType<School> {
 
     @Override
     public abstract School readFromBuffer(PacketBuffer buffer);
+
+    @Override
+    public SchoolType setRegistryName(ResourceLocation name) {
+        this.setId(name);
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getRegistryName() {
+        return this.getId();
+    }
+
+    @Override
+    public Class<SchoolType> getRegistryType() {
+        return SchoolType.class;
+    }
 }
